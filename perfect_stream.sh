@@ -4,7 +4,7 @@ pkill -f nginx 2>/dev/null || true
 pkill -f ffmpeg 2>/dev/null || true
 sleep 3
 
-SOURCE_URL="http://hi-world.me:80/play/live.php?mac=00:1A:79:1E:00:37&stream=544835&extension=ts&play_token=xHWGoXetce&sn2="
+SOURCE_URL="http://nvpro.tv/live/BASRA1/IRAK1/235756.m3u8"
 WORK_DIR="/app"
 STREAM_DIR="$WORK_DIR/stream"
 HLS_DIR="$STREAM_DIR/hls"
