@@ -1,39 +1,40 @@
-# استخدام Ubuntu كصورة أساسية
+# ==============================================
+# Dockerfile محسّن لمشروع fastcasttv
+# ==============================================
 FROM ubuntu:22.04
 
-# تجنب التفاعل أثناء التثبيت
 ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+ENV PORT=8000
 
-# تحديث النظام وتثبيت المتطلبات
-RUN apt-get update && apt-get install -y \
-    nginx \
+# تثبيت الحزم الضرورية
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
+    nginx \
     bash \
     curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* \
-    && rm -rf /var/tmp/*
+    ca-certificates \
+    tzdata \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# إنشاء دليل العمل والمجلدات المطلوبة
+# مجلد العمل
 WORKDIR /app
-RUN mkdir -p /app/hls /app/logs
 
 # نسخ ملفات المشروع
-COPY nginx.conf /app/nginx.conf
-COPY start.sh /app/start.sh
+COPY . .
 
-# جعل السكريبت قابل للتنفيذ
-RUN chmod +x /app/start.sh
+# إنشاء مجلدات HLS و Logs
+RUN mkdir -p stream/hls stream/logs \
+    && mkdir -p /var/log/nginx /var/lib/nginx /run \
+    && chmod +x perfect_stream.sh \
+    && chmod 755 stream/hls
 
-# إعداد متغيرات البيئة
-ENV SOURCE_URL="http://188.241.219.157/ulke.bordo1453.befhjjjj/Orhantelegrammmm30conextionefbn/274122?token=ShJdY2ZmQQNHCmMZCDZXUh9GSHAWGFMD.ZDsGQVN.WGBFNX013GR9YV1QbGBp0QE9SWmpcXlQXXlUHWlcbRxFACmcDY1tXEVkbVAoAAQJUFxUbRFldAxdeUAdaVAFcUwcHAhwWQlpXQQMLTFhUG0FQQU1VQl4HWTsFVBQLVABGCVxEXFgeEVwNZgFcWVlZBxcDGwESHERcFxETWAxCCQgfEFNZQEBSRwYbX1dBVFtPF1pWRV5EFExGWxMmJxVJRlZKRVVaQVpcDRtfG0BLFU8XUEpvQlUVQRYEUA8HRUdeEQITHBZfUks8WgpXWl1UF1xWV0MSCkQERk0TDw1ZDBBcQG5AXVYRCQ1MCVVJ"
-ENV HLS_TIME=3
-ENV HLS_LIST_SIZE=5
-ENV STREAM_QUALITY=720p
+# نسخ nginx.conf المحسّن
+RUN cp stream/nginx.conf /etc/nginx/nginx.conf
 
-# كشف المنفذ
-EXPOSE 5000
+# فتح البورت
+EXPOSE 8000
 
-# تشغيل السكريپت مباشرة
-CMD ["bash", "/app/start.sh"]
+# تشغيل السكربت المحسّن مباشرة
+CMD ["./perfect_stream.sh"]
