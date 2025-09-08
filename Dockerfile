@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     tzdata \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
+# مجلد العمل
 WORKDIR /app
 
 # نسخ الملفات
@@ -26,9 +26,11 @@ RUN mkdir -p stream/hls stream/logs \
     && chmod +x perfect_stream.sh \
     && chmod 755 stream/hls
 
-# نسخ nginx.conf template
-RUN cp stream/nginx.conf.template /etc/nginx/nginx.conf.template
+# نسخ nginx.conf
+RUN cp stream/nginx.conf /etc/nginx/nginx.conf
 
+# تعريف البورت
 EXPOSE 8000
 
+# تشغيل السيرفر
 CMD ["./perfect_stream.sh"]
