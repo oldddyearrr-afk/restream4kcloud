@@ -1,6 +1,3 @@
-# ==============================================
-# Dockerfile محسّن لمشروع fastcasttv
-# ==============================================
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -18,10 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# مجلد العمل
 WORKDIR /app
 
-# نسخ ملفات المشروع
+# نسخ الملفات
 COPY . .
 
 # إنشاء مجلدات HLS و Logs
@@ -30,11 +26,9 @@ RUN mkdir -p stream/hls stream/logs \
     && chmod +x perfect_stream.sh \
     && chmod 755 stream/hls
 
-# نسخ nginx.conf المحسّن
-RUN cp stream/nginx.conf /etc/nginx/nginx.conf
+# نسخ nginx.conf template
+RUN cp stream/nginx.conf.template /etc/nginx/nginx.conf.template
 
-# فتح البورت
 EXPOSE 8000
 
-# تشغيل السكربت المحسّن مباشرة
 CMD ["./perfect_stream.sh"]
