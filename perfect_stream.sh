@@ -13,11 +13,12 @@ WORK_DIR="/app"
 STREAM_DIR="$WORK_DIR/stream"
 HLS_DIR="$STREAM_DIR/hls"
 LOGS_DIR="$STREAM_DIR/logs"
+NGINX_TEMPLATE="/etc/nginx/nginx.conf.template"
 NGINX_CONF="/etc/nginx/nginx.conf"
 PORT=${PORT:-8000}
 
-# تحديث البورت داخل Nginx
-sed -i "s/PORT_PLACEHOLDER/$PORT/" "$NGINX_CONF"
+# تطبيق envsubst على nginx.conf
+envsubst '${PORT}' < "$NGINX_TEMPLATE" > "$NGINX_CONF"
 
 # تنظيف مجلد HLS
 mkdir -p "$LOGS_DIR" "$HLS_DIR"
@@ -30,7 +31,7 @@ NGINX_PID=$!
 sleep 2
 
 # =============================
-# دالة لتشغيل FFmpeg مع إعادة التشغيل التلقائية
+# تشغيل FFmpeg مع إعادة التشغيل التلقائية
 # =============================
 start_ffmpeg() {
     ffmpeg -hide_banner -loglevel error \
@@ -51,9 +52,7 @@ start_ffmpeg() {
 
 start_ffmpeg
 
-# =============================
 # مراقبة FFmpeg وإعادة التشغيل
-# =============================
 monitor_ffmpeg() {
     while true; do
         sleep 15
@@ -64,9 +63,7 @@ monitor_ffmpeg() {
     done
 }
 
-# =============================
 # تنظيف segments قديمة لتخفيف الضغط
-# =============================
 cleanup_segments() {
     while true; do
         sleep 10
@@ -80,14 +77,10 @@ cleanup_segments() {
 monitor_ffmpeg & cleanup_segments &
 MONITOR_PID=$!; CLEANUP_PID=$!
 
-# =============================
-# تنظيف عند الإغلاق
-# =============================
 cleanup() {
     kill $FFMPEG_PID $NGINX_PID $MONITOR_PID $CLEANUP_PID 2>/dev/null || true
     exit 0
 }
 trap cleanup SIGTERM SIGINT
 
-# إبقاء السكربت يعمل
 while true; do sleep 60; done
